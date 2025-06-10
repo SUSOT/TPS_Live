@@ -7,6 +7,8 @@
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Animation/TPSAnimInstance.h"
 
 // Sets default values
 ATPSCharactor::ATPSCharactor()
@@ -72,6 +74,17 @@ ATPSCharactor::ATPSCharactor()
 	{
 		TurnAction = TurnActionRef.Object;
 	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> RunActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Run.IA_Run'"));
+	if (RunActionRef.Succeeded())
+	{
+		RunAction = RunActionRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> FireActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Actions/IA_Fire.IA_Fire'"));
+	if (FireActionRef.Succeeded())
+	{
+		FireAction = FireActionRef.Object;
+	}
 #pragma endregion
 
 }
@@ -81,6 +94,8 @@ ATPSCharactor::ATPSCharactor()
 void ATPSCharactor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
@@ -113,6 +128,8 @@ void ATPSCharactor::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATPSCharactor::Input_Move);
 		EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ATPSCharactor::Input_Turn);
+		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Triggered, this, &ATPSCharactor::Input_Run);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &ATPSCharactor::Input_Fire);
 	}
 
 }
@@ -131,5 +148,29 @@ void ATPSCharactor::Input_Turn(const FInputActionValue& InputValue)
 
 	AddControllerYawInput(LookAxisVector.X);
 	AddControllerPitchInput(LookAxisVector.Y);
+}
+
+void ATPSCharactor::Input_Run(const FInputActionValue& InputValue)
+{
+	const bool isRun = InputValue.Get<bool>();
+
+	if (isRun == true)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+	}
+	else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+	}
+}
+
+void ATPSCharactor::Input_Fire(const FInputActionValue& InputValue)
+{
+	UTPSAnimInstance* AnimInstace = Cast<UTPSAnimInstance>(GetMesh()->GetAnimInstance());
+
+	if (AnimInstace)
+	{
+		AnimInstace->PlayFireMontage();
+	}
 }
 

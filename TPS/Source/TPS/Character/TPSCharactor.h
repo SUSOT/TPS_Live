@@ -21,7 +21,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -39,6 +39,8 @@ protected:
 public:
 	void Input_Move(const FInputActionValue& InputValue);
 	void Input_Turn(const FInputActionValue& InputValue);
+	void Input_Run(const FInputActionValue& InputValue);
+	void Input_Fire(const FInputActionValue& InputValue);
 
 protected:
 	UPROPERTY(EditAnywhere, Category = Input)
@@ -49,6 +51,11 @@ protected:
 	TObjectPtr<class UInputAction> MoveAction;
 	UPROPERTY(EditAnywhere, Category = Input)
 	TObjectPtr<class UInputAction> TurnAction;
+	UPROPERTY(EditAnyWhere, Category = Input)
+	TObjectPtr<class UInputAction> RunAction;
+	UPROPERTY(EditAnyWhere, Category = Input)
+	TObjectPtr<class UInputAction> FireAction;
+
 #pragma endregion
 
 };
