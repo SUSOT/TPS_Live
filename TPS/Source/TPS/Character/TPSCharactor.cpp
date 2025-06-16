@@ -9,6 +9,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/TPSAnimInstance.h"
+#include "Engine/SkeletalMeshSocket.h"
+#include "Weapon/Weapon.h"
 
 // Sets default values
 ATPSCharactor::ATPSCharactor()
@@ -22,7 +24,7 @@ ATPSCharactor::ATPSCharactor()
 	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -88.0f));
 	GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> MeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/MilitaryCharDark/MW_Style2_Female.MW_Style2_Female'"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> MeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/_Art/MilitaryCharDark/MW_Style2_Female.MW_Style2_Female'"));
 
 	if (MeshRef.Succeeded())
 	{
@@ -50,6 +52,13 @@ ATPSCharactor::ATPSCharactor()
 	// Camera
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
+
+	// Weapon Class
+	static ConstructorHelpers::FClassFinder<AWeapon> WeaponRef(TEXT("/Script/Engine.Blueprint'/Game/Blueprints/BP_Weapon.BP_Weapon'"));
+	if (WeaponRef.Succeeded())
+	{
+		WeaponClass = WeaponRef.Class;
+	}
 
 #pragma region InputSystem
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> IMCDefaultRef(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Input/IMC_Default.IMC_Default'"));
@@ -95,6 +104,16 @@ void ATPSCharactor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Spawn Weapon
+	if (WeaponClass)
+	{
+		AttachWeapon(WeaponClass);
+	}
+	else
+	{
+		AttachWeapon(AWeapon::StaticClass());
+	}
+
 	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
@@ -134,6 +153,22 @@ void ATPSCharactor::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 }
 
+void ATPSCharactor::AttachWeapon(TSubclassOf<class AWeapon> NewWeapon)
+{
+	if (NewWeapon)
+	{
+		FActorSpawnParameters PawnParams;
+		PawnParams.Owner = this;
+		EquipWeapon = GetWorld()->SpawnActor<AWeapon>(NewWeapon, PawnParams);
+
+		const USkeletalMeshSocket* WeaponSocket = GetMesh()->GetSocketByName("WeaponSocket");
+		if (WeaponSocket && EquipWeapon)
+		{
+			WeaponSocket->AttachActor(EquipWeapon, GetMesh());
+		}
+	}
+}
+
 void ATPSCharactor::Input_Move(const FInputActionValue& InputValue)
 {
 	const FVector2D MovementVector = InputValue.Get<FVector2D>();
@@ -168,9 +203,17 @@ void ATPSCharactor::Input_Fire(const FInputActionValue& InputValue)
 {
 	UTPSAnimInstance* AnimInstace = Cast<UTPSAnimInstance>(GetMesh()->GetAnimInstance());
 
-	if (AnimInstace)
+	if (AnimInstace == nullptr)
+		return;
+
+	bool bFireStart = InputValue.Get<bool>();
+	if (bFireStart)
 	{
 		AnimInstace->PlayFireMontage();
+	}
+	else
+	{
+		AnimInstace->StopAllMontages(false);
 	}
 }
 

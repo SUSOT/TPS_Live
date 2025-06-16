@@ -28,6 +28,16 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+public:
+	void AttachWeapon(TSubclassOf<class AWeapon> NewWeapon);
+
+protected:
+	UPROPERTY(EditAnywhere, Category = Weapon)
+	TSubclassOf<class AWeapon> WeaponClass;
+
+	UPROPERTY(EditAnywhere, Category = Weapon)
+	TObjectPtr<class AWeapon> EquipWeapon;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly)
 	TObjectPtr<class USpringArmComponent> SpringArm;
