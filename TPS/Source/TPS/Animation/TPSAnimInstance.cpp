@@ -19,7 +19,7 @@ void UTPSAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
-	Character = Cast<ATPSCharactor>(TryGetPawnOwner());
+	Character = Cast<ATPSCharacter>(TryGetPawnOwner());
 
 	if (Character)
 	{

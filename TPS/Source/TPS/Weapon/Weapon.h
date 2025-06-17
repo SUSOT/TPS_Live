@@ -6,6 +6,13 @@
 #include "GameFramework/Actor.h"
 #include "Weapon.generated.h"
 
+UENUM(BlueprintType)
+enum class EFireType : uint8 
+{
+	EF_Projectile UMETA(Displayname = "Projectile"),
+	EF_LineTrace UMETA(Displayname = "LineTrace"),
+};
+
 UCLASS()
 class TPS_API AWeapon : public AActor
 {
@@ -22,6 +29,16 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+public:
+	virtual void StartFire(TWeakObjectPtr<class ATPSCharacter> OwnerCharacter);
+	virtual void StopFire();
+	virtual void Reloading();
+	virtual void FinishReloaing();
+
+protected:
+	void FireWithProjectile(TWeakObjectPtr<class ATPSCharacter> OwnerCharacter);
+	void FireWithLineTrace(TWeakObjectPtr<class ATPSCharacter> OwnerCharacter);
 
 public:
 	FORCEINLINE int32 GetAmmoMaxCount() { return AmmoMaxCount; }
@@ -45,4 +62,16 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = properties)
 	float ReloadingDelayTime = 3.0f;
+
+	UPROPERTY(EditAnywhere, Category = properties)
+	float TraceDistance = 5000.0f;
+
+	UPROPERTY(EditAnywhere, Category = properties)
+	float FireInterval = 0.1f;
+
+	UPROPERTY(EditAnywhere, Category = properties)
+	EFireType FireType = EFireType::EF_Projectile;
+
+private:
+	FTimerHandle FireTimerHandle;
 };

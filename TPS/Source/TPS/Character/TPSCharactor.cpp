@@ -13,7 +13,7 @@
 #include "Weapon/Weapon.h"
 
 // Sets default values
-ATPSCharactor::ATPSCharactor()
+ATPSCharacter::ATPSCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -100,7 +100,7 @@ ATPSCharactor::ATPSCharactor()
 
 
 // Called when the game starts or when spawned
-void ATPSCharactor::BeginPlay()
+void ATPSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -129,14 +129,14 @@ void ATPSCharactor::BeginPlay()
 }
 
 // Called every frame
-void ATPSCharactor::Tick(float DeltaTime)
+void ATPSCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
 // Called to bind functionality to input
-void ATPSCharactor::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ATPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
@@ -145,15 +145,15 @@ void ATPSCharactor::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	{
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATPSCharactor::Input_Move);
-		EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ATPSCharactor::Input_Turn);
-		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Triggered, this, &ATPSCharactor::Input_Run);
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &ATPSCharactor::Input_Fire);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Move);
+		EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Turn);
+		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Run);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &ATPSCharacter::Input_Fire);
 	}
 
 }
 
-void ATPSCharactor::AttachWeapon(TSubclassOf<class AWeapon> NewWeapon)
+void ATPSCharacter::AttachWeapon(TSubclassOf<class AWeapon> NewWeapon)
 {
 	if (NewWeapon)
 	{
@@ -169,7 +169,7 @@ void ATPSCharactor::AttachWeapon(TSubclassOf<class AWeapon> NewWeapon)
 	}
 }
 
-void ATPSCharactor::Input_Move(const FInputActionValue& InputValue)
+void ATPSCharacter::Input_Move(const FInputActionValue& InputValue)
 {
 	const FVector2D MovementVector = InputValue.Get<FVector2D>();
 
@@ -177,7 +177,7 @@ void ATPSCharactor::Input_Move(const FInputActionValue& InputValue)
 	AddMovementInput(GetActorRightVector(), MovementVector.Y);
 }
 
-void ATPSCharactor::Input_Turn(const FInputActionValue& InputValue)
+void ATPSCharacter::Input_Turn(const FInputActionValue& InputValue)
 {
 	const FVector2D LookAxisVector = InputValue.Get<FVector2D>();
 
@@ -185,7 +185,7 @@ void ATPSCharactor::Input_Turn(const FInputActionValue& InputValue)
 	AddControllerPitchInput(LookAxisVector.Y);
 }
 
-void ATPSCharactor::Input_Run(const FInputActionValue& InputValue)
+void ATPSCharacter::Input_Run(const FInputActionValue& InputValue)
 {
 	const bool isRun = InputValue.Get<bool>();
 
@@ -199,7 +199,7 @@ void ATPSCharactor::Input_Run(const FInputActionValue& InputValue)
 	}
 }
 
-void ATPSCharactor::Input_Fire(const FInputActionValue& InputValue)
+void ATPSCharacter::Input_Fire(const FInputActionValue& InputValue)
 {
 	UTPSAnimInstance* AnimInstace = Cast<UTPSAnimInstance>(GetMesh()->GetAnimInstance());
 
@@ -207,13 +207,17 @@ void ATPSCharactor::Input_Fire(const FInputActionValue& InputValue)
 		return;
 
 	bool bFireStart = InputValue.Get<bool>();
-	if (bFireStart)
+	if (bFireStart && EquipWeapon->GetAmmoRemainCount() > 0)
 	{
 		AnimInstace->PlayFireMontage();
+
+		EquipWeapon->StartFire(this);
 	}
 	else
 	{
 		AnimInstace->StopAllMontages(false);
+
+		EquipWeapon->StopFire();
 	}
 }
 

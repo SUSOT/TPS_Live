@@ -30,7 +30,7 @@ protected:
 
 protected:
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<class ATPSCharactor> Character;
+	TObjectPtr<class ATPSCharacter> Character;
 
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<class UCharacterMovementComponent> MovementComponent;

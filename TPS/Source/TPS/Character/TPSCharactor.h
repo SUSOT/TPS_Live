@@ -9,13 +9,13 @@
 struct FInputActionValue;
 
 UCLASS()
-class TPS_API ATPSCharactor : public ACharacter
+class TPS_API ATPSCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
-	ATPSCharactor();
+	ATPSCharacter();
 
 protected:
 	// Called when the game starts or when spawned
